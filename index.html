@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美股+港股日报</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+  .container { max-width: 800px; margin: 0 auto; padding: 24px 20px; }
+  .header { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); color: white; padding: 32px; border-radius: 16px; margin-bottom: 24px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .header .subtitle { font-size: 14px; opacity: 0.8; }
+  .report-list { display: grid; gap: 12px; }
+  .report-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+  .report-card .date { font-size: 18px; font-weight: 700; }
+  .report-card .session { font-size: 13px; color: #64748b; }
+  .report-card a { display: inline-block; background: #3b82f6; color: white; padding: 8px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; }
+  .report-card a:hover { background: #2563eb; }
+  .footer { text-align: center; padding: 24px; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; margin-top: 32px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📈 美股+港股日报</h1>
+    <div class="subtitle">AI 自动生成 · 每日盘前盘后更新 · 数据源 NeoData</div>
+  </div>
+  <div class="report-list" id="report-list">
+    <!-- Reports will be populated dynamically -->
+  </div>
+  <div class="footer">
+    <p>⚠️ 本报告由 AI 基于 NeoData 金融数据服务自动生成，仅供参考，不构成任何投资建议。</p>
+  </div>
+</div>
+<script>
+// Auto-detect reports in the /reports/ directory
+// This page reads from reports.json
+fetch('reports.json')
+  .then(r => r.json())
+  .then(data => {
+    const list = document.getElementById('report-list');
+    data.reports.sort((a, b) => b.date.localeCompare(a.date)).forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'report-card';
+      card.innerHTML = `
+        <div>
+          <div class="date">${r.date}</div>
+          <div class="session">${r.session === 'am' ? '🌅 AM盘前 · 隔夜收盘' : '🌙 PM盘后 · 盘中动态'}</div>
+        </div>
+        <a href="${r.file}">查看报告 →</a>
+      `;
+      list.appendChild(card);
+    });
+  })
+  .catch(() => {
+    document.getElementById('report-list').innerHTML = '<p style="text-align:center;color:#64748b;">暂无报告</p>';
+  });
+</script>
+</body>
+</html>
