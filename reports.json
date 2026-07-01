@@ -1,9 +1,14 @@
 {
   "reports": [
     {
-      "date": "2026-05-22",
+      "date": "2026-07-02",
+      "session": "pm",
+      "file": "reports/report-pm-2026-07-02.html"
+    },
+    {
+      "date": "2026-06-17",
       "session": "am",
-      "file": "reports/report-am-2026-05-22.html"
+      "file": "reports/report-am-2026-06-17.html"
     },
     {
       "date": "2026-06-17",
@@ -11,9 +16,9 @@
       "file": "reports/report-pm-2026-06-17.html"
     },
     {
-      "date": "2026-06-17",
+      "date": "2026-05-22",
       "session": "am",
-      "file": "reports/report-am-2026-06-17.html"
+      "file": "reports/report-am-2026-05-22.html"
     }
   ]
 }
