@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, initial-scale=1.0">
+<title>美股+港股日报 - 2026-07-06 PM盘后报告 · 盘中动态</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    font-family: -apple-system, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif; 
+    background: #0a0a0f; 
+    color: #e8e8f0; 
+    width: 1080px; 
+    overflow-x: hidden;
+  }
+
+  /* ===== 顶部 Header ===== */
+  .header {
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    padding: 48px 40px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header .logo { font-size: 20px; color: rgba(255,255,255,0.5); letter-spacing: 4px; text-transform: uppercase; }
+  .header h1 { font-size: 52px; font-weight: 800; margin: 8px 0; background: linear-gradient(90deg, #fff, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header .subtitle { font-size: 26px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+  .header .meta { display: flex; gap: 16px; margin-top: 20px; }
+  .header .badge { display: inline-block; padding: 6px 16px; border-radius: 24px; font-size: 18px; font-weight: 600; }
+  .badge-us { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .badge-hk { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .badge-session { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+
+  /* ===== 板块通用 ===== */
+  .section {
+    padding: 36px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .section-title {
+    font-size: 30px; font-weight: 700; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title .icon { font-size: 34px; }
+  .section-title .label { 
+    font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.4); 
+    margin-left: auto; letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  /* ===== 三大指数 ===== */
+  .index-row {
+    display: flex; gap: 16px; margin-bottom: 12px;
+  }
+  .index-card {
+    flex: 1;
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 28px 24px;
+    position: relative; overflow: hidden;
+  }
+  .index-card .name { font-size: 20px; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+  .index-card .price { font-size: 48px; font-weight: 800; letter-spacing: -1px; }
+  .index-card .change { font-size: 22px; font-weight: 700; margin-top: 6px; }
+  .index-card .extra { font-size: 16px; color: rgba(255,255,255,0.4); margin-top: 8px; }
+  .up { color: #34d399; }
+  .down { color: #f87171; }
+  .index-card .glow {
+    position: absolute; top: -40px; right: -40px;
+    width: 120px; height: 120px; border-radius: 50%; opacity: 0.15;
+  }
+  .glow-green { background: #34d399; }
+  .glow-red { background: #f87171; }
+
+  /* ===== VIX ===== */
+  .vix-row { display: flex; align-items: center; gap: 32px; }
+  .vix-big { text-align: center; min-width: 240px; }
+  .vix-big .number { font-size: 80px; font-weight: 900; line-height: 1; }
+  .vix-big .label { font-size: 18px; color: rgba(255,255,255,0.5); margin-top: 8px; }
+  .vix-big .status { 
+    display: inline-block; padding: 6px 20px; border-radius: 24px; 
+    font-size: 18px; font-weight: 600; margin-top: 12px;
+  }
+  .vix-chart-wrap { flex: 1; height: 200px; }
+
+  /* ===== 焦点事件 ===== */
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before { content: ""; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: rgba(59,130,246,0.3); }
+  .tl-item { position: relative; margin-bottom: 28px; }
+  .tl-item::before { 
+    content: ""; position: absolute; left: -26px; top: 8px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #3b82f6; border: 2px solid #0a0a0f; box-shadow: 0 0 0 2px #3b82f6;
+  }
+  .tl-item .tag { 
+    display: inline-block; padding: 3px 12px; border-radius: 6px;
+    font-size: 16px; font-weight: 700; margin-bottom: 6px;
+  }
+  .tl-item .desc { font-size: 22px; line-height: 1.5; color: rgba(255,255,255,0.85); }
+  .tag-red { background: rgba(239,68,68,0.2); color: #f87171; }
+  .tag-blue { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .tag-green { background: rgba(16,185,129,0.2); color: #34d399; }
+  .tag-yellow { background: rgba(245,158,11,0.2); color: #fbbf24; }
+  .tag-purple { background: rgba(139,92,246,0.2); color: #a78bfa; }
+
+  /* ===== 异动个股 ===== */
+  .stock-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; margin-bottom: 8px;
+    background: rgba(255,255,255,0.04); border-radius: 14px;
+    border-left: 4px solid transparent;
+  }
+  .stock-item.gainer { border-left-color: #34d399; }
+  .stock-item.loser { border-left-color: #f87171; }
+  .stock-item .left { flex: 1; }
+  .stock-item .ticker { font-size: 24px; font-weight: 800; }
+  .stock-item .company { font-size: 16px; color: rgba(255,255,255,0.5); }
+  .stock-item .reason { font-size: 18px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+  .stock-item .right { text-align: right; min-width: 160px; }
+  .stock-item .chg { font-size: 28px; font-weight: 800; }
+
+  /* ===== 13F 表格 ===== */
+  .filing-table { width: 100%; border-collapse: collapse; font-size: 20px; }
+  .filing-table th { 
+    text-align: left; padding: 14px 16px; 
+    background: rgba(59,130,246,0.1); color: #60a5fa; 
+    font-size: 18px; font-weight: 700; 
+    border-bottom: 1px solid rgba(59,130,246,0.2);
+  }
+  .filing-table td { 
+    padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+    color: rgba(255,255,255,0.85);
+  }
+  .filing-table tr:hover { background: rgba(255,255,255,0.03); }
+
+  /* ===== IPO ===== */
+  .ipo-card {
+    padding: 24px; margin-bottom: 12px; border-radius: 16px;
+    background: rgba(255,255,255,0.04);
+    border-left: 5px solid #3b82f6;
+  }
+  .ipo-card .ipo-name { font-size: 28px; font-weight: 800; }
+  .ipo-card .ipo-detail { font-size: 20px; color: rgba(255,255,255,0.65); margin-top: 8px; line-height: 1.5; }
+  .ipo-card.hot { border-left-color: #f59e0b; background: rgba(245,158,11,0.06); }
+
+  /* ===== 中概股 ===== */
+  .adr-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .adr-item {
+    width: calc(25% - 10px); padding: 16px 12px; border-radius: 12px;
+    background: rgba(255,255,255,0.04); text-align: center;
+  }
+  .adr-item .name { font-size: 20px; font-weight: 700; }
+  .adr-item .chg { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+  /* ===== 港股 ===== */
+  .hk-row { display: flex; gap: 16px; margin-bottom: 16px; }
+  .hk-card {
+    flex: 1; padding: 24px; border-radius: 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .hk-card .name { font-size: 20px; color: rgba(255,255,255,0.6); }
+  .hk-card .price { font-size: 40px; font-weight: 800; margin-top: 4px; }
+  .hk-card .change { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .flow-row { display: flex; gap: 16px; }
+  .flow-box {
+    flex: 1; padding: 20px; border-radius: 14px; text-align: center;
+  }
+  .flow-south { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05)); border: 1px solid rgba(245,158,11,0.2); }
+  .flow-north { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05)); border: 1px solid rgba(59,130,246,0.2); }
+  .flow-box .label { font-size: 18px; color: rgba(255,255,255,0.6); }
+  .flow-box .amount { font-size: 26px; font-weight: 800; margin-top: 6px; }
+
+  /* ===== 日历 ===== */
+  .cal-row { display: flex; gap: 8px; }
+  .cal-day {
+    flex: 1; padding: 18px 12px; border-radius: 14px; text-align: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .cal-day .day { font-size: 16px; color: rgba(255,255,255,0.5); }
+  .cal-day .event { font-size: 17px; margin-top: 6px; font-weight: 600; }
+  .cal-day.today { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+  .cal-day.important { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+
+  /* ===== Footer ===== */
+  .footer {
+    padding: 36px 40px; text-align: center;
+    color: rgba(255,255,255,0.3); font-size: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .footer .brand { font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<div class="header">
+  <div class="logo">US + HK MARKET DAILY</div>
+  <h1>📈 美股+港股日报</h1>
+  <div class="subtitle">2026-07-06 · PM盘后报告 · 盘中动态</div>
+  <div class="meta">
+    <span class="badge badge-us">🇺🇸 美股</span>
+    <span class="badge badge-hk">🇭🇰 港股</span>
+    <span class="badge badge-session">盘后</span>
+  </div>
+</div>
+
+<!-- ===== 1. 三大指数 ===== -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">🏛️</span> 三大指数速览
+    <span class="label">US INDICES · 7/2收盘</span>
+  </div>
+  <div class="index-row">
+    <div class="index-card">
+      <div class="glow glow-green"></div>
+      <div class="name">🇺🇸 道琼斯</div>
+      <div class="price">52,900</div>
+      <div class="change up">▲ +1.14% 创历史新高</div>
+      <div class="extra">周涨 +1.97% · YTD +8.85%</div>
+    </div>
+    <div class="index-card">
+      <div class="glow" style="background:#6b7280;"></div>
+      <div class="name">🇺🇸 标普500</div>
+      <div class="price">7,483</div>
+      <div class="change" style="color:#9ca3af;">— 0.00% 几乎平收</div>
+      <div class="extra">周涨 +1.76% · YTD +9.55%</div>
+    </div>
+    <div class="index-card">
+      <div class="glow glow-red"></div>
+      <div class="name">🇺🇸 纳斯达克</div>
+      <div class="price">25,833</div>
+      <div class="change down">▼ -0.80%</div>
+      <div class="extra">周涨 +2.12% · YTD +12.8%</div>
+    </div>
+  </div>
+  <div style="font-size:16px; color:rgba(255,255,255,0.35); margin-top:8px;">💡 7月3日为美国独立日休市，7月4-5日为周末，最新数据截至7月2日美东收盘</div>
+</div>
+
+<!-- ===== 2. VIX ===== -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">📊</span> VIX & 市场情绪
+    <span class="label">FEAR GAUGE</span>
+  </div>
+  <div class="vix-row">
+    <div class="vix-big">
+      <div class="number up">18.10</div>
+      <div class="label">CBOE 波动率指数</div>
+      <div class="status" style="background:rgba(245,158,11,0.2);color:#fbbf24;">中性偏谨慎</div>
+    </div>
+    <div class="vix-chart-wrap">
+      <canvas id="vixChart"></canvas>
+    </div>
+  </div>
+  <div style="font-size:16px; color:rgba(255,255,255,0.35); margin-top:12px;">💡 VIX回升至18上方：费城半导体两日暴跌11%推升避险情绪，但道指创新高限制涨幅</div>
+</div>
+
+<!-- ===== 3. 今日焦点 ===== -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">🔥</span> 今日焦点
+    <span class="label">KEY EVENTS</span>
+  </div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tag tag-red">芯片股崩盘</div>
+      <div class="desc">Meta拟出售过剩AI算力引发算力过剩恐慌，费城半导体指数两日累跌11%——闪迪-14%、科磊-12%、西部数据-9%、美光-5%、英特尔-5%、ARM-6%</div>
+    </div>
+    <div class="tl-item">
+      <div class="tag tag-blue">非农爆冷</div>
+      <div class="desc">6月非农仅增5.7万人（预期11万），4个月最低；4-5月数据累计下修7.4万。失业率降至4.2%。市场押注美联储暂缓加息</div>
+    </div>
+    <div class="tl-item">
+      <div class="tag tag-green">苹果领涨</div>
+      <div class="desc">苹果大涨4.84%，折叠屏iPhone备货从700-800万台上调至约1000万台，iPhone 18高端系列提前预留零部件</div>
+    </div>
+    <div class="tl-item">
+      <div class="tag tag-purple">资金大轮动</div>
+      <div class="desc">道指创历史新高，资金从科技向传统蓝筹轮动：麦当劳+4.16%、强生+3.57%、可口可乐+3.51%、沃尔玛+2.78%</div>
+    </div>
+    <div class="tl-item">
+      <div class="tag tag-yellow">特斯拉闪崩</div>
+      <div class="desc">Q2交付48万辆增25%超预期，但"买预期卖事实"暴跌7.49%，为近一年最大单日跌幅</div>
+    </div>
+    <div class="tl-item">
+      <div class="tag tag-red">⚠️ 高盛警告</div>
+      <div class="desc">AI与动量交易出现力竭信号，对冲基金VIP多头组合年内回报-21%，建议下半年转向医疗等防御板块</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4. 异动个股 ===== -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">🌅</span> 盘中异动亮点
+    <span class="label">MOVERS · 7/2</span>
+  </div>
+  <div class="stock-item gainer">
+    <div class="left">
+      <div class="ticker">AAPL</div>
+      <div class="company">苹果 · $308.63</div>
+      <div class="reason">折叠屏iPhone备货上调至1000万台</div>
+    </div>
+    <div class="right"><div class="chg up">+4.84%</div></div>
+  </div>
+  <div class="stock-item gainer">
+    <div class="left">
+      <div class="ticker">MCD</div>
+      <div class="company">麦当劳</div>
+      <div class="reason">资金从科技轮动至防御蓝筹</div>
+    </div>
+    <div class="right"><div class="chg up">+4.16%</div></div>
+  </div>
+  <div class="stock-item gainer">
+    <div class="left">
+      <div class="ticker">JNJ</div>
+      <div class="company">强生</div>
+      <div class="reason">防御性板块资金回流</div>
+    </div>
+    <div class="right"><div class="chg up">+3.57%</div></div>
+  </div>
+  <div class="stock-item gainer">
+    <div class="left">
+      <div class="ticker">KO</div>
+      <div class="company">可口可乐</div>
+      <div class="reason">消费防御龙头获资金青睐</div>
+    </div>
+    <div class="right"><div class="chg up">+3.51%</div></div>
+  </div>
+  <div class="stock-item loser">
+    <div class="left">
+      <div class="ticker">SNDK</div>
+      <div class="company">闪迪 · $1,745</div>
+      <div class="reason">AI算力过剩恐慌，存储芯片龙头遭抛售</div>
+    </div>
+    <div class="right"><div class="chg down">-14.13%</div></div>
+  </div>
+  <div class="stock-item loser">
+    <div class="left">
+      <div class="ticker">TSLA</div>
+      <div class="company">特斯拉 · $393.45</div>
+      <div class="reason">Q2交付超预期但"买预期卖事实"</div>
+    </div>
+    <div class="right"><div class="chg down">-7.49%</div></div>
+  </div>
+  <div class="stock-item loser">
+    <div class="left">
+      <div class="ticker">INTC</div>
+      <div class="company">英特尔 · $120.35</div>
+      <div class="reason">半导体板块全线抛售</div>
+    </div>
+    <div class="right"><div class="chg down">-5.25%</div></div>
+  </div>
+  <div class="stock-item loser">
+    <div class="left">
+      <div class="ticker">META</div>
+      <div class="company">Meta · 出售算力引发恐慌</div>
+      <div class="reason">拟出售过剩AI算力，市场质疑芯片需求</div>
+    </div>
+    <div class="right"><div class="chg down">-4.00%+</div></div>
+  </div>
+</div>
+
+<!-- ===== 5. 13F持仓 ===== -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">📋</span> 13F 持仓动向
+    <span class="label">Q1 2026 FILINGS</span>
+  </div>
+  <table class="filing-table">
+    <thead>
+      <tr><th>机构</th><th>新增</th><th>增持</th><th>减持/清仓</th><th>关注点</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>伯克希尔</td><td>达美航空$26.5亿</td><td>Alphabet +3640万股</td><td>清仓亚马逊/Visa/万事达</td><td>现金储备$3974亿创新高</td></tr>
+      <tr><td>桥水基金</td><td>台积电107.7万股</td><td>英伟达/博通/美光</td><td>清仓Salesforce/ServiceNow</td><td>AI算力硬件主线</td></tr>
+      <tr><td>索罗斯基金</td><td>伯克希尔B股/美光</td><td>英伟达+61%/台积电+49%</td><td>减持亚马逊/微软</td><td>加码AI芯片+公用事业</td></tr>
+      <tr><td>文艺复兴</td><td>苹果新建仓</td><td>英伟达/博通/摩根大通</td><td>清仓亚马逊/减持奈飞</td><td>AI+金融双线布局</td></tr>
+      <tr><td>潘兴广场</td><td>微软$24亿</td><td>--</td><td>清仓Alphabet</td><td>押注OpenAI合作价值</td></tr>
+    </tbody>
+  </table>
+  <div style="font-size:16px; color:rgba(255,255,255,0.35); margin-top:12px;">💡 Q1 13F核心趋势：机构一致加仓AI芯片（NVDA/TSMC/MU），清仓传统SaaS软件股</div>
+</div>
+
+<!-- ===== 6. IPO ===== -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">🎯</span> 港美股IPO
+    <span class="label">IPO · 本周</span>
+  </div>
+  <div class="ipo-card hot">
+    <div class="ipo-name">🚀 SpaceX 纳入纳斯达克100指数</div>
+    <div class="ipo-detail">7月7日（明日）正式纳入纳指100 · 上市不到一个月即获纳入，史上最快 · 被动资金预计大量买入 · 权重低于1%</div>
+  </div>
+  <div class="ipo-card hot">
+    <div class="ipo-name">💾 SK海力士 ADR纳斯达克上市</div>
+    <div class="ipo-detail">7月10日上市 · 发行规模最高45.45万亿韩元（约2001亿人民币）· 可比肩阿里250亿美元纪录IPO · HBM存储芯片全球龙头</div>
+  </div>
+  <div class="ipo-card">
+    <div class="ipo-name">📱 立讯精密 港股上市</div>
+    <div class="ipo-detail">7月9日港交所挂牌 · 募资约240亿港元（31亿美元）· 苹果核心供应商 · 今年港股消费电子最具分量IPO</div>
+  </div>
+  <div class="ipo-card">
+    <div class="ipo-name">🤖 宇树科技 科创板IPO</div>
+    <div class="ipo-detail">证监会已批准注册 · 拟募资42.02亿元 · "A股人形机器人第一股" · 2025年人形机器人出货量全球第一 · 估值约420亿元</div>
+  </div>
+</div>
+
+<!-- ===== 7. 中概股 ===== -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">💰</span> 中概股动态
+    <span class="label">CHINA ADR · 7/2</span>
+  </div>
+  <div style="font-size:22px; margin-bottom:16px;">
+    金龙指数 <span class="down">▼ -1.77%</span> · 中概股多数下跌，仅京东逆势上涨
+  </div>
+  <div class="adr-grid">
+    <div class="adr-item"><div class="name">百度</div><div class="chg down">▼ -3.93%</div></div>
+    <div class="adr-item"><div class="name">蔚来</div><div class="chg down">▼ -3.62%</div></div>
+    <div class="adr-item"><div class="name">小鹏</div><div class="chg down">▼ -3.82%</div></div>
+    <div class="adr-item"><div class="name">世纪互联</div><div class="chg down">▼ -10%+</div></div>
+    <div class="adr-item"><div class="name">爱奇艺</div><div class="chg down">▼ -4.72%</div></div>
+    <div class="adr-item"><div class="name">阿里</div><div class="chg down">▼ -1.89%</div></div>
+    <div class="adr-item"><div class="name">理想</div><div class="chg down">▼ -1.72%</div></div>
+    <div class="adr-item"><div class="name">B站</div><div class="chg down">▼ -1.66%</div></div>
+    <div class="adr-item"><div class="name">网易</div><div class="chg down">▼ -1.90%</div></div>
+    <div class="adr-item"><div class="name">拼多多</div><div class="chg down">▼ -0.16%</div></div>
+    <div class="adr-item"><div class="name">京东</div><div class="chg up">▲ +1.18%</div></div>
+    <div class="adr-item"><div class="name">百胜中国</div><div class="chg up">▲ +1%+</div></div>
+  </div>
+</div>
+
+<!-- ===== 8. 港股联动 ===== -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">🇭🇰</span> 港股联动 & 南北资金
+    <span class="label">HK MARKET · 7/3收盘</span>
+  </div>
+  <div class="hk-row">
+    <div class="hk-card">
+      <div class="name">🇭🇰 恒生指数</div>
+      <div class="price">23,350</div>
+      <div class="change up">▲ +1.28%</div>
+    </div>
+    <div class="hk-card">
+      <div class="name">🇭🇰 恒生科技</div>
+      <div class="price">4,499</div>
+      <div class="change up">▲ +1.00%</div>
+    </div>
+  </div>
+  <div style="font-size:18px; color:rgba(255,255,255,0.6); margin-bottom:12px;">
+    本周恒指 +2.99% · 恒科 +5.72%（年内最大周涨幅）· 医药板块领涨+14.5%
+  </div>
+  <div class="flow-row">
+    <div class="flow-box flow-south">
+      <div class="label">南向资金（港股通）</div>
+      <div class="amount down">净流出18.8亿</div>
+    </div>
+    <div class="flow-box flow-north">
+      <div class="label">热门个股</div>
+      <div class="amount">腾讯净买入20.7亿</div>
+    </div>
+  </div>
+  <div style="font-size:16px; color:rgba(255,255,255,0.35); margin-top:12px;">💡 恒指PE 11.29x（68%分位）· 南向资金6月净流入235.88亿 · 快手可灵AI融资30亿美元估值180亿</div>
+</div>
+
+<!-- ===== 9. 财经日历 (PM隐藏) ===== -->
+<div class="section" id="calendar-section" style="display:none">
+  <div class="section-title">
+    <span class="icon">📅</span> 本周财经日历
+    <span class="label">CALENDAR</span>
+  </div>
+  <div class="cal-row">
+    <div class="cal-day today">
+      <div class="day">周一 7/6</div>
+      <div class="event">ISM非制造业<br>韩国24h外汇交易</div>
+    </div>
+    <div class="cal-day important">
+      <div class="day">周二 7/7</div>
+      <div class="event">SpaceX入纳指100<br>三星财报/OpenAI GPT-5.6</div>
+    </div>
+    <div class="cal-day">
+      <div class="day">周三 7/8</div>
+      <div class="event">智谱解禁<br>中国互联网大会</div>
+    </div>
+    <div class="cal-day important">
+      <div class="day">周四 7/9</div>
+      <div class="event">美联储会议纪要<br>中国CPI/PPI · 立讯IPO</div>
+    </div>
+    <div class="cal-day important">
+      <div class="day">周五 7/10</div>
+      <div class="event">SK海力士ADR上市<br>长征十号乙首飞</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="footer">
+  <div class="brand">US+HK MARKET DAILY</div>
+  <div>⚠️ 本报告由 AI 基于 NeoData 金融数据服务自动生成，仅供参考</div>
+  <div>投资有风险，决策需谨慎 · 数据截至 2026-07-02 美东收盘 / 2026-07-03 港股收盘</div>
+</div>
+
+<script>
+const vixCtx = document.getElementById('vixChart');
+if (vixCtx) {
+  new Chart(vixCtx, {
+    type: 'line',
+    data: {
+      labels: ['5/15','5/22','5/29','6/5','6/12','6/17','6/24','7/1','7/2'],
+      datasets: [{
+        label: 'VIX',
+        data: [17.5, 16.8, 17.4, 16.5, 18.0, 20.8, 19.5, 16.2, 18.1],
+        borderColor: '#60a5fa',
+        backgroundColor: 'rgba(96,165,250,0.08)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: '#60a5fa',
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { display: false },
+      },
+      scales: {
+        y: { 
+          min: 14, max: 24, 
+          grid: { color: 'rgba(255,255,255,0.06)' },
+          ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 14 } }
+        },
+        x: { 
+          grid: { display: false },
+          ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 14 } }
+        }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
